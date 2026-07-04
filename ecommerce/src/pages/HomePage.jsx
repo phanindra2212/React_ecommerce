@@ -1,14 +1,20 @@
 import axios from 'axios'
-import { Header } from "../components/header";
-import { products as Products } from '../../starting-code/data/products';
+import { useEffect, useState } from 'react';
+import Header from "../components/header";
+// import { products as Products } from '../../starting-code/data/products';
 import "./HomePage.css";
 
 export function HomePage() {
-    axios.fetch("http://localhost:3000/api/products")
+
+    const [products,setProducts] = useState([]);
+
+    useEffect(() =>{
+    axios.get("http://localhost:3000/api/products")
     .then((response)=>{
-            console.log(response.data)
+            setProducts(response.data)
         })
- 
+    }, []);
+    
     return (
         <>
             <Header />
@@ -16,7 +22,7 @@ export function HomePage() {
             <div className="home-page">
                 <div className="products-grid">
 
-                    {Products.map((product) => (
+                    {products.map((product) => (
                         <div key={product.id} className="product-container">
 
                             <div className="product-image-container">
