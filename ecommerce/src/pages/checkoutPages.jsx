@@ -59,10 +59,16 @@ export function CheckoutPage({ cartItems = [] }) {
 
         <div className="checkout-grid">
           <div className="order-summary">
-            {cartItems.map((carts) => {
+            {deliveryOption.length > 0 && cartItems.map((carts) => {
+              const selectedDeliveryOption = carts.deliveryOptionId
+                .find((deliveryOption) => {
+                  return deliveryOption.id === carts.deliveryOptionId
+                })
               return (
                 <div key={carts.productId} className="cart-item-container">
-                  <div className="delivery-date">
+                  <div className={dayjs(selectedDeliveryOption.estimatedDeliveryTimeMs)
+                    .format('dddd, MMMM D')
+                  }>
                     {dayjs(carts.deliverySLA).format('dddd, MMMM D')}
 
                   </div>
@@ -103,7 +109,7 @@ export function CheckoutPage({ cartItems = [] }) {
                         }
                         return (
                           <div className="delivery-option">
-                            <input type="radio" defaultChecked
+                            <input type="radio" checked={deliveryOption.id === carts.deliveryOptionId}
                               className="delivery-option-input"
                               name={`delivery-option-${carts.productId}`} />
                             <div>
@@ -111,7 +117,7 @@ export function CheckoutPage({ cartItems = [] }) {
                                 Tuesday, June 21
                               </div>
                               <div className="delivery-option-price">
-                                FREE Shipping
+                                {priceString}
                               </div>
                             </div>
                           </div>
