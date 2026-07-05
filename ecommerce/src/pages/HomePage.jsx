@@ -3,8 +3,9 @@ import { useEffect, useState } from 'react';
 import Header from "../components/header";
 // import { products as Products } from '../../starting-code/data/products';
 import "./HomePage.css";
+import { formatMoney } from '../utils/money';
 
-export function HomePage({ cartItems }) {
+export function HomePage({ cartItems = [] }) {
 
     const [products, setProducts] = useState([]);
 
@@ -54,7 +55,7 @@ export function HomePage({ cartItems }) {
                             </div>
 
                             <div className="product-price">
-                                ${(product.priceCents / 100).toFixed(2)}
+                               ${formatMoney(product.priceCents)}
                             </div>
 
                             <div className="product-quantity-container">
