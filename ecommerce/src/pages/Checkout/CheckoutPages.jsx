@@ -1,41 +1,27 @@
-import './CheckoutHeader.css'
-import './CheckoutPages.css'
-import { Link } from 'react-router';
 import axios from 'axios';
 import { useState, useEffect } from 'react';
 import { OrderSummary } from './OrderSummary';
 import { PaymentSummary } from './PaymentSummary';
+import './CheckoutHeader.css';
+import './CheckoutPages.css';
 
-export function CheckoutPage({ cartItems = [] }) {
-  const [deliveryOption, setDeliveryOption] = useState([]);
+export function CheckoutPage({ cart, loadCart }) {
+  const [deliveryOptions, setDeliveryOptions] = useState([]);
+  const [paymentSummary, setPaymentSummary] = useState(null);
 
   useEffect(() => {
-    axios.get('/api/delivery-options?expand=estimatedDeliveryTime')
-      .then((response) => {
-        setDeliveryOption(response.data);
-      });
-  }, []);
+    const fetchCheckoutData = async () => {
+      let response = await axios.get(
+        '/api/delivery-options?expand=estimatedDeliveryTime'
+      );
+      setDeliveryOptions(response.data);
 
-  const getSelectedDeliveryOption = (cartItem) => {
-    return deliveryOption.find(option => option.id === cartItem.deliveryOptionId) || { deliveryDays: 7, priceCents: 0 };
-  };
+      response = await axios.get('/api/payment-summary');
+      setPaymentSummary(response.data);
+    };
 
-  let totalQuantity = 0;
-  let itemsPriceCents = 0;
-  let shippingCents = 0;
-
-  cartItems.forEach((carts) => {
-    totalQuantity += carts.quantity;
-    if (carts.product) {
-      itemsPriceCents += carts.product.priceCents * carts.quantity;
-    }
-    const selectedOption = getSelectedDeliveryOption(carts);
-    shippingCents += selectedOption.priceCents;
-  });
-
-  const totalBeforeTaxCents = itemsPriceCents + shippingCents;
-  const estimatedTaxCents = Math.round(totalBeforeTaxCents * 0.1);
-  const orderTotalCents = totalBeforeTaxCents + estimatedTaxCents;
+    fetchCheckoutData();
+  }, [cart]);
 
   return (
     <>
@@ -44,19 +30,19 @@ export function CheckoutPage({ cartItems = [] }) {
       <div className="checkout-header">
         <div className="header-content">
           <div className="checkout-header-left-section">
-            <Link to="/">
-              <img className="logo" src="/images/logo.png" />
-              <img className="mobile-logo" src="/images/mobile-logo.png" />
-            </Link>
+            <a href="/">
+              <img className="logo" src="images/logo.png" />
+              <img className="mobile-logo" src="images/mobile-logo.png" />
+            </a>
           </div>
 
           <div className="checkout-header-middle-section">
-            Checkout (<Link className="return-to-home-link"
-              to="/"> {totalQuantity} {totalQuantity === 1 ? 'item' : 'items'} </Link>)
+            Checkout (<a className="return-to-home-link"
+              href="/">3 items</a>)
           </div>
 
           <div className="checkout-header-right-section">
-            <img src="/images/icons/checkout-lock-icon.png" />
+            <img src="images/icons/checkout-lock-icon.png" />
           </div>
         </div>
       </div>
@@ -65,16 +51,9 @@ export function CheckoutPage({ cartItems = [] }) {
         <div className="page-title">Review your order</div>
 
         <div className="checkout-grid">
-          <OrderSummary cartItems={cartItems} deliveryOption={deliveryOption} />
+          <OrderSummary cart={cart} deliveryOptions={deliveryOptions} loadCart={loadCart} />
 
-          <PaymentSummary 
-            totalQuantity={totalQuantity}
-            itemsPriceCents={itemsPriceCents}
-            shippingCents={shippingCents}
-            totalBeforeTaxCents={totalBeforeTaxCents}
-            estimatedTaxCents={estimatedTaxCents}
-            orderTotalCents={orderTotalCents}
-          />
+          <PaymentSummary paymentSummary={paymentSummary} loadCart={loadCart} />
         </div>
       </div>
     </>
